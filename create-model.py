@@ -1,13 +1,11 @@
-
 import sys
 from tensorflow import keras
 
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization, Add, Activation, Concatenate, Input
-from keras.models import Model
-from keras.applications.mobilenet import MobileNet
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization, Add, Activation, Concatenate, Input
+from tensorflow.keras.models import Model
+from tensorflow.keras.applications.mobilenet import MobileNet
 
 from src.keras_utils import save_model
-
 
 def res_block(x,sz,filter_sz=3,in_conv_size=1):
 	xi  = x
