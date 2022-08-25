@@ -3,4 +3,4 @@ $ python create-model.py eccv models/eccv-model-scracth
 $ python train-detector.py --model models/eccv-model-scracth --name my-trained-model --train-dir samples/train-detector --output-dir models/my-trained-model/ -op Adam -lr .001 -its 300000 -bs 64
 
 
-python train-detector.py --model models/jp-model-v1-u1 --name my-trained-model --train-dir trainDataP1/ --output-dir models/my-trained-model/ -op Adam -lr .001 -its 300000 -bs 64
+python train-detector.py --model models/jp-model-v1-u1 --name my-trained-model --train-dir trainDataP1/ --output-dir models/my-trained-model/ -op Adam -lr .001 -its 10000 -bs 64

@@ -1,7 +1,7 @@
 import sys
 from tensorflow import keras
 
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization, Add, Activation, Concatenate, Input
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization, Add, Activation, Concatenate, Input, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications.mobilenet import MobileNet
 
@@ -10,24 +10,40 @@ from src.keras_utils import save_model
 def res_block(x,sz,filter_sz=3,in_conv_size=1):
 	xi  = x
 	for i in range(in_conv_size):
-		xi  = Conv2D(sz, filter_sz, activation='linear', padding='same')(xi)
+		# xi  = Conv2D(sz, filter_sz, activation='linear', padding='same')(xi)
+		# xi  = BatchNormalization()(xi)
+		# xi 	= LeakyReLU()(xi)
+
+		xi  = Conv2D(sz, filter_sz, activation=None, padding='same')(xi)
+		xi  = Activation(activation='linear')(xi)
 		xi  = BatchNormalization()(xi)
-		xi 	= Activation('relu')(xi)
-	xi  = Conv2D(sz, filter_sz, activation='linear', padding='same')(xi)
+		xi 	= LeakyReLU()(xi)
+		# xi 	= LeakyReLU(alpha=0.01)(xi)
+	xi  = Conv2D(sz, filter_sz, activation=None, padding='same')(xi)
+	xi  = Activation(activation='linear')(xi)
 	xi  = BatchNormalization()(xi)
 	xi 	= Add()([xi,x])
-	xi 	= Activation('relu')(xi)
+	xi 	= LeakyReLU()(xi)
 	return xi
 
 def conv_batch(_input,fsz,csz,activation='relu',padding='same',strides=(1,1)):
-	output = Conv2D(fsz, csz, activation='linear', padding=padding, strides=strides)(_input)
+	output = Conv2D(fsz, csz, activation=None, padding=padding, strides=strides)(_input)
+	output = Activation('linear')(output)
 	output = BatchNormalization()(output)
-	output = Activation(activation)(output)
+	# output = Activation(activation)(output)
+	output = LeakyReLU()(output)
 	return output
 
 def end_block(x):
-	xprobs    = Conv2D(2, 3, activation='softmax', padding='same')(x)
-	xbbox     = Conv2D(6, 3, activation='linear' , padding='same')(x)
+	# xprobs    = Conv2D(2, 3, activation='softmax', padding='same')(x)
+	# xbbox     = Conv2D(6, 3, activation='linear' , padding='same')(x)
+
+	xprobs    = Conv2D(2, 3, activation=None, padding='same')(x)
+	xprobs	  = Activation('softmax')(xprobs)
+	xbbox     = Conv2D(6, 3, activation=None, padding='same')(x)
+	xbbox	  = Activation('linear')(xbbox)
+
+	
 	return Concatenate(3)([xprobs,xbbox])
 
 

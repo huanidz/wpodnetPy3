@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import argparse
 from tensorflow import keras
+import gc
 
 
 from random import choice
@@ -18,7 +19,13 @@ from src.sampler import augment_sample, labels2output_map
 from src.data_generator import DataGenerator
 
 from pdb import set_trace as pause
+from tensorflow.keras import backend as bk
+from tensorflow.keras.callbacks import Callback
 
+class ClearMemory(Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
+        bk.clear_session()
 
 def load_network(modelpath,input_dim):
 
@@ -76,18 +83,21 @@ if __name__ == '__main__':
 	model,model_stride,xshape,yshape = load_network(args.model,dim)
 
 	opt = getattr(keras.optimizers,args.optimizer)(lr=args.learning_rate)
-	model.compile(loss=loss, optimizer=opt)
+	model.compile(loss=loss, optimizer=opt, run_eagerly=True)
 
 	print ('Checking input directory...')
 	Files = image_files_from_folder(train_dir)
 
 	Data = []
+	# Data = np.array([])
 	for file in Files:
 		labfile = splitext(file)[0] + '.txt'
 		if isfile(labfile):
 			L = readShapes(labfile)
 			I = cv2.imread(file)
 			Data.append([I,L[0]])
+			print("Data len: %s file" %len(Data))
+			# Data = np.append(Data,[[I,L[0]]])
 
 	print ('%d images with labels found' % len(Data))
 
@@ -112,7 +122,9 @@ if __name__ == '__main__':
 
 		Xtrain,Ytrain = dg.get_batch(batch_size)
 		train_loss = model.train_on_batch(Xtrain,Ytrain)
-
+		del Xtrain
+		del Ytrain
+		gc.collect()
 		print ('\tLoss: %f' % train_loss)
 
 		# Save model every 1000 iterations
